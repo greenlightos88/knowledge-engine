@@ -12,6 +12,7 @@ const ProjectRegistrySchema = z.object({
       repository: z.string().min(3),
       default_branch: z.string().min(1),
       manifest: z.string().min(1),
+      manifest_ref: z.string().min(1).optional(),
       status: z.string().min(1),
     }),
   ),
@@ -78,6 +79,7 @@ export async function generateTaskEnvelope(request: string, model = "chatgpt") {
   const project = resolveProject(request, registry);
   const route = classifyRoute(request);
   const action = inferAction(route);
+  const manifestRef = project.manifest_ref ?? project.default_branch;
 
   const task = {
     task_id: `${project.id}-${route}-${Date.now()}`,
@@ -92,11 +94,12 @@ export async function generateTaskEnvelope(request: string, model = "chatgpt") {
     project: {
       id: project.id,
       repository: project.repository,
-      branch: project.default_branch,
+      branch: manifestRef,
+      target_branch: project.default_branch,
       manifest_path: project.manifest,
       canon_sources: [],
-      decision_ledger: "DECISION_LOG.md",
-      genre_contract: "GENRE_CONTRACT.md",
+      decision_ledger: "resolve-from-manifest",
+      genre_contract: "resolve-from-manifest",
       production_mode: "resolve-from-manifest",
     },
     artifact: {
@@ -140,5 +143,5 @@ export async function generateTaskEnvelope(request: string, model = "chatgpt") {
     },
   };
 
-  return { model, project_status: project.status, route, task, yaml: stringifyYaml(task) };
+  return { model, project_status: project.status, manifest_ref: manifestRef, route, task, yaml: stringifyYaml(task) };
 }
