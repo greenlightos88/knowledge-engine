@@ -7,6 +7,8 @@ const ClaimSchema = z.object({
   failures: z.array(z.string()).default([]),
 });
 
+type Claim = z.infer<typeof ClaimSchema>;
+
 export const CreativeResultSchema = z.object({
   diagnosis: z.object({
     primary_failure: z.string().min(1),
@@ -44,6 +46,14 @@ export type GateResult = {
   failures: string[];
 };
 
+export type ValidationResult = {
+  status: "not_run" | "failed" | "passed";
+  valid: boolean;
+  parsed: CreativeResult | null;
+  gates: GateResult[];
+  failures: string[];
+};
+
 function extractJson(content: string): unknown {
   const trimmed = content.trim();
   if (trimmed.startsWith("{")) return JSON.parse(trimmed);
@@ -52,7 +62,7 @@ function extractJson(content: string): unknown {
   return JSON.parse(fenced[1]);
 }
 
-function gateClaim(result: CreativeResult, gate: string): ClaimSchema['_output'] | undefined {
+function gateClaim(result: CreativeResult, gate: string): Claim | undefined {
   const claims = result.validation_claims;
   if (gate === "intent-alignment") return claims.intent_alignment;
   if (gate === "canon-integrity") return claims.canon_integrity;
@@ -63,9 +73,9 @@ function gateClaim(result: CreativeResult, gate: string): ClaimSchema['_output']
   return undefined;
 }
 
-export function validateCreativeResponse(request: ProviderRequest, response: ProviderResponse) {
+export function validateCreativeResponse(request: ProviderRequest, response: ProviderResponse): ValidationResult {
   if (response.finish_reason === "dry_run") {
-    return { status: "not_run" as const, valid: false, parsed: null, gates: [], failures: ["Dry-run responses cannot be approved."] };
+    return { status: "not_run", valid: false, parsed: null, gates: [], failures: ["Dry-run responses cannot be approved."] };
   }
 
   let parsed: CreativeResult;
@@ -73,10 +83,10 @@ export function validateCreativeResponse(request: ProviderRequest, response: Pro
     parsed = CreativeResultSchema.parse(extractJson(response.content));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    return { status: "failed" as const, valid: false, parsed: null, gates: [], failures: [`Invalid response contract: ${message}`] };
+    return { status: "failed", valid: false, parsed: null, gates: [], failures: [`Invalid response contract: ${message}`] };
   }
 
-  const task = request.task as { validation?: { required_gates?: string[] }; authority?: { locked_decisions?: string[] } };
+  const task = request.task as { validation?: { required_gates?: string[] } };
   const requiredGates = task.validation?.required_gates ?? [];
   const gates: GateResult[] = requiredGates.map((gate) => {
     const claim = gateClaim(parsed, gate);
@@ -89,7 +99,7 @@ export function validateCreativeResponse(request: ProviderRequest, response: Pro
   if (parsed.synchronization.unresolved_questions.length > 0) failures.push(...parsed.synchronization.unresolved_questions.map((item) => `unresolved: ${item}`));
 
   return {
-    status: failures.length === 0 ? "passed" as const : "failed" as const,
+    status: failures.length === 0 ? "passed" : "failed",
     valid: failures.length === 0,
     parsed,
     gates,
@@ -97,7 +107,7 @@ export function validateCreativeResponse(request: ProviderRequest, response: Pro
   };
 }
 
-export function buildRepairInstruction(validation: ReturnType<typeof validateCreativeResponse>): string {
+export function buildRepairInstruction(validation: Pick<ValidationResult, "valid" | "failures">): string {
   if (validation.valid) return "No repair required.";
   return [
     "Repair only the failed requirements below.",
