@@ -4,7 +4,14 @@ export const ProviderRequestSchema = z.object({
   execution_id: z.string().min(1),
   model: z.string().min(1),
   system_instructions: z.string().min(1),
-  context: z.array(z.object({ path: z.string(), authority: z.string(), content: z.string() })),
+  context: z.array(z.object({
+    path: z.string(),
+    authority: z.string(),
+    content: z.string(),
+    repository: z.string().optional(),
+    ref: z.string().optional(),
+    sha: z.string().optional(),
+  })),
   task: z.unknown(),
   output_contract: z.object({ format: z.string(), completion_definition: z.array(z.string()) }),
 });
@@ -41,6 +48,9 @@ export class DryRunProvider implements ModelProvider {
       structured: {
         status: "planned",
         context_documents: request.context.map((item) => item.path),
+        remote_sources: request.context
+          .filter((item) => item.repository)
+          .map((item) => ({ repository: item.repository, ref: item.ref, path: item.path, sha: item.sha })),
         completion_definition: request.output_contract.completion_definition,
       },
       finish_reason: "dry_run",
