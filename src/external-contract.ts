@@ -145,6 +145,8 @@ export function toExternalIntelligenceResponse(
   ExternalIntelligenceRequestSchema.parse(request);
 
   const primarySource = request.sources[0];
+  if (!primarySource) throw new Error("External intelligence requests require at least one source.");
+
   const evidence = result.intent_contract.success_conditions.map((claim, index) => ({
     evidence_id: `${request.request_id}:evidence:${index + 1}`,
     source_id: primarySource.source_id,
