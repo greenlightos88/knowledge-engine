@@ -19,6 +19,9 @@ const TaskEnvelopeSchema = z.object({
   }),
   project: z.object({
     id: z.string().min(1),
+    repository: z.string().min(3).optional(),
+    branch: z.string().min(1).optional(),
+    target_branch: z.string().min(1).optional(),
     manifest_path: z.string().min(1),
     canon_sources: z.array(z.string()).default([]),
     decision_ledger: z.string().min(1),
@@ -141,12 +144,14 @@ export async function assembleContext(taskPath: string, model: string) {
   ]);
 
   return {
-    manifest_version: "1.0",
+    manifest_version: "1.1",
     task_id: task.task_id,
     model,
     adapter: adapter.adapter,
     adapter_status: adapter.status,
     route: task.retrieval.route,
+    project_repository: task.project.repository,
+    project_ref: task.project.branch,
     authority_order: task.authority.order,
     locked_decisions: task.authority.locked_decisions,
     constraints: task.request.explicit_constraints,
