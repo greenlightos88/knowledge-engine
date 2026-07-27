@@ -69,7 +69,22 @@ Use ratings:
 - Description is precise without directing every shot.
 - Production implications are understandable.
 
-## Gate 9 — Originality and anti-AI quality
+## Gate 9 — Human authorship quality
+
+This gate is mandatory for all finished narrative prose, dialogue and screenplay pages. Run the full rubric in `human-writing/human-writing-gate.md`.
+
+- A particular consciousness governs attention and selection.
+- Emotional meaning is carried by strategy, contradiction, timing and consequence rather than stock physical shorthand.
+- Characters differ in thought pattern, articulation, social tactic and use of silence.
+- Specificity is local, functional and difficult to transfer unchanged to another project.
+- Rhythm responds to consciousness and pressure rather than manufactured intensity.
+- The audience is allowed to infer without losing essential causality.
+- Surprising choices are earned by character, world and consequence.
+- No automatic rejection condition from the Human Writing Gate remains unresolved.
+
+A fluent page that fails this gate is not approved.
+
+## Gate 10 — Originality and anti-AI quality
 
 - The work is not assembled from default genre beats without transformation.
 - Specificity arises from character, world, causality and worldview.
@@ -78,7 +93,7 @@ Use ratings:
 - The work leaves appropriate negative space and does not explain every inference.
 - References have been translated into abstract attributes rather than copied.
 
-## Gate 10 — Production fitness
+## Gate 11 — Production fitness
 
 - Format and length are appropriate.
 - Constraints are acknowledged and creatively integrated.
@@ -92,6 +107,7 @@ Use ratings:
 ARTIFACT:
 AUTHORITY LEVEL:
 GATES PASSED:
+HUMAN WRITING SCORE: /14
 GATES REQUIRING REVISION:
 BLOCKING DEFECTS:
 STRENGTHS TO PROTECT:
