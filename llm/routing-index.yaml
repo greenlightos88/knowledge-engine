@@ -1,0 +1,94 @@
+version: 1.0
+purpose: Route LLM tasks to the smallest sufficient doctrine packet.
+
+always_load:
+  - AGENTS.md
+  - system/creator-intent-standard.md
+  - system/full-capability-standard.md
+  - templates/creative-success-profile.md
+  - templates/project-manifest.md
+
+routes:
+  audience_confusion:
+    task_types: [diagnose, revise, evaluate]
+    primary:
+      - cognition/attention-salience-and-selection.md
+      - cognition/cognitive-load-and-chunking.md
+    secondary:
+      - craft/scene-mechanics.md
+      - craft/cinematic-storytelling.md
+    gates:
+      - quality/intent-alignment-gate.md
+      - quality/acceptance-gates.md
+
+  weak_reveal_or_twist:
+    task_types: [diagnose, design, revise]
+    primary:
+      - cognition/prediction-expectation-and-surprise.md
+      - cognition/memory-encoding-and-recall.md
+    secondary:
+      - craft/pacing-tension-and-revelation.md
+      - system/genre-contract-standard.md
+    gates:
+      - quality/intent-alignment-gate.md
+      - quality/acceptance-gates.md
+
+  forgotten_setup_or_payoff:
+    task_types: [diagnose, revise, synchronize]
+    primary:
+      - cognition/memory-encoding-and-recall.md
+      - cognition/attention-salience-and-selection.md
+    secondary:
+      - craft/story-architecture.md
+      - system/dependency-graph-standard.md
+    gates:
+      - quality/acceptance-gates.md
+
+  exposition_overload:
+    task_types: [diagnose, revise]
+    primary:
+      - cognition/cognitive-load-and-chunking.md
+      - cognition/attention-salience-and-selection.md
+    secondary:
+      - craft/dialogue-and-subtext.md
+      - human-writing/silence-omission-and-negative-space.md
+    gates:
+      - human-writing/human-writing-gate.md
+      - quality/intent-alignment-gate.md
+
+  character_psychology:
+    task_types: [develop, diagnose, revise]
+    primary:
+      - psychology/appraisal-and-meaning.md
+      - psychology/desire-need-and-motivation.md
+      - psychology/coping-defence-and-avoidance.md
+    secondary:
+      - craft/character-and-psychology.md
+      - human-writing/contradiction-and-emotional-truth.md
+    gates:
+      - psychology/psychology-gate.md
+      - quality/intent-alignment-gate.md
+
+  scene_revision:
+    task_types: [diagnose, revise, evaluate]
+    primary:
+      - craft/scene-mechanics.md
+      - craft/dialogue-and-subtext.md
+      - cognition/attention-salience-and-selection.md
+    secondary:
+      - craft/pacing-tension-and-revelation.md
+      - human-writing/human-writing-gate.md
+    gates:
+      - quality/intent-alignment-gate.md
+      - human-writing/human-writing-gate.md
+      - quality/acceptance-gates.md
+
+assembly_rules:
+  max_primary_documents: 4
+  max_secondary_documents: 4
+  follow_dependencies_hops: 1
+  preserve_authority_order: true
+  separate_canon_from_doctrine: true
+  require_reason_for_each_document: true
+  require_output_contract: true
+  require_dependency_report: true
