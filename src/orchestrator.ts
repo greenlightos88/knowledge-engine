@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { buildApprovalPackage } from "./approval-package";
 import { fetchGitHubSource } from "./github-source";
+import { buildExecutionPlan } from "./high-fidelity";
 import { loadRemoteProjectManifest, resolveManifestRoute, resolveSynchronizationTargets } from "./project-loader";
 import { assembleContext, loadTask } from "./runtime";
 import { ProviderRequestSchema, resolveProvider, type ProviderRequest } from "./providers";
@@ -24,9 +25,47 @@ function isLocalKernelPath(path: string): boolean {
 
 const STRICT_RESULT_CONTRACT = `Return only one valid JSON object with this shape:
 {
+  "intent_contract": {
+    "surface_request": "string",
+    "deeper_objective": "string",
+    "audience_effect": ["string"],
+    "artifact_target": "string",
+    "preserve": ["string"],
+    "constraints": ["string"],
+    "anti_goals": ["string"],
+    "success_conditions": ["string"],
+    "assumptions": ["string"],
+    "open_uncertainties": ["string"]
+  },
+  "council_report": {
+    "mode": "light | standard | deep",
+    "passes_run": ["string"],
+    "findings_applied": ["string"],
+    "findings_rejected": [{ "finding": "string", "reason": "string" }],
+    "remaining_disagreements": ["string"]
+  },
   "diagnosis": { "primary_failure": "string", "supporting_failures": ["string"] },
   "artifact": { "format": "string", "content": "complete deliverable" },
   "canon_report": { "preserved": ["string"], "conflicts": ["string"], "new_inferences": ["string"] },
+  "confidence": {
+    "intent": { "level": "low | medium | high", "evidence": ["string"], "uncertainty": ["string"] },
+    "canon": { "level": "low | medium | high", "evidence": ["string"], "uncertainty": ["string"] },
+    "craft": { "level": "low | medium | high", "evidence": ["string"], "uncertainty": ["string"] },
+    "production": { "level": "low | medium | high", "evidence": ["string"], "uncertainty": ["string"] }
+  },
+  "wow_scorecard": {
+    "intent_fidelity": 0,
+    "canon_integrity": 0,
+    "creative_causality": 0,
+    "human_writing": 0,
+    "audience_design": 0,
+    "production_usefulness": 0,
+    "long_horizon_coherence": 0,
+    "taste_fit": 0,
+    "trust_transparency": 0,
+    "usability_momentum": 0,
+    "creator_validation_required_for_ten": true
+  },
   "validation_claims": {
     "intent_alignment": { "passed": true, "evidence": ["string"], "failures": [] },
     "canon_integrity": { "passed": true, "evidence": ["string"], "failures": [] },
@@ -37,7 +76,7 @@ const STRICT_RESULT_CONTRACT = `Return only one valid JSON object with this shap
   },
   "synchronization": { "files_to_update": ["path"], "downstream_impacts": ["string"], "unresolved_questions": [] }
 }
-Do not use markdown fences. Do not claim a gate passed without evidence from the supplied sources.`;
+Do not use markdown fences. Do not claim a gate passed without evidence from the supplied sources. Do not assign a score of 10 without explicit creator validation or benchmark evidence.`;
 
 export async function buildProviderRequest(taskPath: string, model: string) {
   const [task, kernelManifest] = await Promise.all([loadTask(taskPath), assembleContext(taskPath, model)]);
@@ -86,14 +125,17 @@ export async function buildProviderRequest(taskPath: string, model: string) {
   const adapter = context.find((item) => item.path === kernelManifest.adapter)?.content;
   if (!adapter) throw new Error(`Adapter content was not assembled: ${kernelManifest.adapter}`);
 
+  const executionPlan = buildExecutionPlan(task);
+  const plannedTask = { ...task, high_fidelity: executionPlan };
+
   return ProviderRequestSchema.parse({
     execution_id: randomUUID(),
     model,
-    system_instructions: `${adapter}\n\n${STRICT_RESULT_CONTRACT}`,
+    system_instructions: `${adapter}\n\nEXECUTION PLAN:\n${JSON.stringify(executionPlan, null, 2)}\n\n${STRICT_RESULT_CONTRACT}`,
     context,
-    task,
+    task: plannedTask,
     output_contract: {
-      format: "strict-json-creative-result",
+      format: "strict-json-high-fidelity-creative-result",
       completion_definition: task.output.completion_definition,
     },
   });
@@ -113,7 +155,7 @@ export async function runTask(taskPath: string, model: string, providerId = "dry
   let activeRequest = request;
   let response = await provider.execute(activeRequest);
   let validation = validateCreativeResponse(activeRequest, response);
-  const task = activeRequest.task as { validation?: { repair_passes?: number } };
+  const task = activeRequest.task as { validation?: { repair_passes?: number }; high_fidelity?: unknown };
   const repairLimit = providerId === "dry-run" ? 0 : task.validation?.repair_passes ?? 0;
   let repairsAttempted = 0;
 
@@ -143,6 +185,7 @@ export async function runTask(taskPath: string, model: string, providerId = "dry
         : "validation_failed",
     provider: provider.id,
     model,
+    execution_plan: task.high_fidelity,
     context_count: activeRequest.context.length,
     remote_context_count: activeRequest.context.filter((item) => "repository" in item).length,
     repairs_attempted: repairsAttempted,
