@@ -47,7 +47,9 @@ export function resolveProject(request: string, registry: ProjectRegistry) {
 
   if (matches.length === 0) throw new Error("No registered project was identified in the request.");
   if (matches.length > 1) throw new Error(`Ambiguous project reference: ${matches.map(([id]) => id).join(", ")}`);
-  const [id, project] = matches[0];
+  const match = matches[0];
+  if (!match) throw new Error("Project resolution failed unexpectedly.");
+  const [id, project] = match;
   return { id, ...project };
 }
 
@@ -58,8 +60,9 @@ export function classifyRoute(request: string): string {
     score: route.terms.reduce((score, term) => score + (normalized.includes(term) ? 1 : 0), 0),
   })).sort((a, b) => b.score - a.score);
 
-  if (ranked[0].score === 0) return "general_creative_diagnostic";
-  return ranked[0].id;
+  const best = ranked[0];
+  if (!best || best.score === 0) return "general_creative_diagnostic";
+  return best.id;
 }
 
 function inferAction(route: string) {
