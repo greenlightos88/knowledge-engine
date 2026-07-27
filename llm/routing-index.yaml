@@ -1,10 +1,18 @@
-version: 1.0
-purpose: Route LLM tasks to the smallest sufficient doctrine packet.
+version: 1.1
+purpose: Route LLM tasks to the smallest sufficient doctrine packet and the correct execution contracts.
+
+kernel_contracts:
+  task_envelope: kernel/task-envelope.schema.yaml
+  execution_pipeline: kernel/execution-pipeline.md
+  validation_contract: kernel/validation-contract.schema.yaml
+  synchronization_contract: kernel/synchronization-contract.md
+
+model_adapters:
+  chatgpt: adapters/chatgpt/adapter.md
 
 always_load:
   - AGENTS.md
   - system/creator-intent-standard.md
-  - system/full-capability-standard.md
   - templates/creative-success-profile.md
   - templates/project-manifest.md
 
@@ -83,7 +91,22 @@ routes:
       - human-writing/human-writing-gate.md
       - quality/acceptance-gates.md
 
+  repository_canon_change:
+    task_types: [revise, synchronize, evaluate]
+    primary:
+      - system/dependency-graph-standard.md
+      - system/decision-ledger-standard.md
+      - kernel/synchronization-contract.md
+    secondary:
+      - system/creator-intent-standard.md
+      - quality/intent-alignment-gate.md
+    gates:
+      - quality/intent-alignment-gate.md
+      - quality/acceptance-gates.md
+
 assembly_rules:
+  select_model_adapter: true
+  instantiate_task_envelope: true
   max_primary_documents: 4
   max_secondary_documents: 4
   follow_dependencies_hops: 1
@@ -91,4 +114,6 @@ assembly_rules:
   separate_canon_from_doctrine: true
   require_reason_for_each_document: true
   require_output_contract: true
+  require_validation_contract: true
   require_dependency_report: true
+  fail_closed_on_canon_conflict: true
