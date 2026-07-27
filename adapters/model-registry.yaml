@@ -1,0 +1,50 @@
+version: 1.0
+purpose: Declare supported GreenLit model adapters without duplicating doctrine.
+
+shared_kernel:
+  task_schema: kernel/task-envelope.schema.yaml
+  execution_pipeline: kernel/execution-pipeline.md
+  routing_index: llm/routing-index.yaml
+  validation_contract: kernel/validation-contract.schema.yaml
+  synchronization_contract: kernel/synchronization-contract.md
+
+models:
+  chatgpt:
+    adapter: adapters/chatgpt/adapter.md
+    status: first_class
+    preferred_for:
+      - interactive creative development
+      - bounded diagnostics
+      - multimodal interpretation
+      - repository-integrated execution
+      - concise iterative collaboration
+    controls:
+      bounded_context: true
+      diagnose_before_execute: true
+      explicit_uncertainty: true
+      require_validation: true
+      require_synchronization_report: true
+
+  claude:
+    adapter: adapters/claude/adapter.md
+    status: first_class
+    preferred_for:
+      - long-document synthesis
+      - canon comparison
+      - continuity audits
+      - long-form revision
+      - structural decomposition
+    controls:
+      bounded_context: true
+      diagnose_before_execute: true
+      explicit_uncertainty: true
+      require_validation: true
+      require_synchronization_report: true
+
+fallback:
+  adapter: adapters/README.md
+  policy:
+    - use shared kernel contracts
+    - preserve authority order
+    - do not invent model-specific doctrine
+    - declare unsupported capabilities
