@@ -1,6 +1,6 @@
 {
   "name": "@greenlit/knowledge-engine",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "packageManager": "bun@1.2.19",
@@ -14,6 +14,7 @@
     "check": "bun run typecheck && bun test"
   },
   "dependencies": {
+    "openai": "^6.39.0",
     "yaml": "^2.8.1",
     "zod": "^4.0.14"
   },
