@@ -1,13 +1,14 @@
-version: 1.0
+version: 1.1
 purpose: Resolve natural-language project references to authoritative repositories and manifests.
 
 projects:
   ekpo:
     aliases: [EKPO, Ekpo, echo]
-    repository: greenlightos88/EKPO
+    repository: greenlightos88/ekpo
     default_branch: main
     manifest: PROJECT_MANIFEST.yaml
-    status: integration_pending
+    manifest_ref: integrate/greenlit-kernel-v1
+    status: integrated_on_branch
 
   mana:
     aliases: [MANA, Mana]
@@ -20,3 +21,4 @@ resolution:
   require_explicit_or_unique_match: true
   fail_on_ambiguous_project: true
   never_guess_unknown_project: true
+  require_verified_manifest_ref: true
