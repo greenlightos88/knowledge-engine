@@ -103,13 +103,7 @@ function repairRequest(request: ProviderRequest, failures: string[]): ProviderRe
   return ProviderRequestSchema.parse({
     ...request,
     execution_id: randomUUID(),
-    system_instructions: `${request.system_instructions}\n\n${buildRepairInstruction({
-      status: "failed",
-      valid: false,
-      parsed: null,
-      gates: [],
-      failures,
-    })}`,
+    system_instructions: `${request.system_instructions}\n\n${buildRepairInstruction({ valid: false, failures })}`,
   });
 }
 
