@@ -1,4 +1,4 @@
-version: 1.0
+version: 1.1
 purpose: Declare supported GreenLit model adapters without duplicating doctrine.
 
 shared_kernel:
@@ -7,6 +7,10 @@ shared_kernel:
   routing_index: llm/routing-index.yaml
   validation_contract: kernel/validation-contract.schema.yaml
   synchronization_contract: kernel/synchronization-contract.md
+  intent_reconstruction: system/intent-reconstruction-standard.md
+  creative_council: system/creative-council-standard.md
+  wow_scorecard: quality/wow-readiness-scorecard.md
+  high_fidelity_workflow: workflows/wow-execution.md
 
 models:
   chatgpt:
@@ -47,4 +51,7 @@ fallback:
     - use shared kernel contracts
     - preserve authority order
     - do not invent model-specific doctrine
+    - reconstruct intent before generation
+    - use one synthesized council result
+    - never self-award a perfect score
     - declare unsupported capabilities
