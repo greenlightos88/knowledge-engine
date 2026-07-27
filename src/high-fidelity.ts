@@ -21,8 +21,9 @@ export type CouncilPlan = {
   rationale: string[];
 };
 
-const DEEP_SIGNALS = ["screenplay", "repository", "system", "project", "act", "ending", "mythology", "cosmology", "canon"];
-const STANDARD_SIGNALS = ["scene", "sequence", "character", "bible", "package", "production"];
+const DEEP_SCOPE_SIGNALS = ["repository", "system", "project", "act", "ending", "mythology", "cosmology", "canon"];
+const STANDARD_SCOPE_SIGNALS = ["scene", "sequence", "character", "bible", "package", "production"];
+const DEEP_ARTIFACT_SIGNALS = ["screenplay", "repository", "system", "project", "bible", "mythology", "cosmology", "canon"];
 
 function includesSignal(values: string[], signals: string[]): boolean {
   return values.some((value) => signals.some((signal) => value.toLowerCase().includes(signal)));
@@ -51,24 +52,35 @@ export function reconstructIntent(task: TaskEnvelope): IntentContract {
 }
 
 export function selectCouncil(task: TaskEnvelope): CouncilPlan {
-  const scopeSignals = [task.action.scope, task.artifact.kind, task.retrieval.route];
-  const mode: CouncilMode = includesSignal(scopeSignals, DEEP_SIGNALS)
-    ? "deep"
-    : includesSignal(scopeSignals, STANDARD_SIGNALS)
-      ? "standard"
-      : "light";
+  const scope = task.action.scope.toLowerCase();
+  const artifact = task.artifact.kind.toLowerCase();
+  const route = task.retrieval.route.toLowerCase();
+
+  // Scope is authoritative. A scene-level task remains bounded even when the
+  // artifact kind contains a broader word such as "screenplay-scene".
+  const mode: CouncilMode = includesSignal([scope], STANDARD_SCOPE_SIGNALS)
+    ? "standard"
+    : includesSignal([scope], DEEP_SCOPE_SIGNALS)
+      ? "deep"
+      : includesSignal([artifact, route], DEEP_ARTIFACT_SIGNALS)
+        ? "deep"
+        : includesSignal([artifact, route], STANDARD_SCOPE_SIGNALS)
+          ? "standard"
+          : "light";
 
   const passes = new Set<string>(["intent-custodian", "artifact-specialist", "human-writing-editor"]);
-  const rationale = [`Selected ${mode} mode from scope '${task.action.scope}' and route '${task.retrieval.route}'.`];
+  const rationale = [
+    `Selected ${mode} mode from authoritative scope '${task.action.scope}', artifact '${task.artifact.kind}', and route '${task.retrieval.route}'.`,
+  ];
 
   if (mode !== "light") {
     passes.add("canon-editor");
     passes.add("audience-simulator");
     passes.add("continuity-editor");
   }
-  if (/character|psychology|relationship/i.test(task.retrieval.route)) passes.add("character-psychologist");
-  if (/scene|story|reveal|twist|canon|mythology/i.test(task.retrieval.route)) passes.add("story-architect");
-  if (/production|package|bible|screenplay/i.test(scopeSignals.join(" "))) passes.add("producer-pass");
+  if (/character|psychology|relationship/i.test(route)) passes.add("character-psychologist");
+  if (/scene|story|reveal|twist|canon|mythology/i.test(route)) passes.add("story-architect");
+  if (/production|package|bible|screenplay/i.test([scope, artifact, route].join(" "))) passes.add("producer-pass");
   if (mode === "deep") passes.add("adversarial-critic");
 
   return { mode, passes: [...passes], rationale };
