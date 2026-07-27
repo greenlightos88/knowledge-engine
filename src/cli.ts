@@ -1,4 +1,4 @@
-import { writeFile } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { generateTaskEnvelope } from "./intake";
 import { runTask } from "./orchestrator";
 import { assembleContext, validateRepositoryInputs } from "./runtime";
@@ -23,8 +23,9 @@ try {
     const request = requestParts.join(" ").trim();
     if (!request) usage();
     const result = await generateTaskEnvelope(request, model);
+    await mkdir(".greenlit", { recursive: true });
     const outputPath = `.greenlit/${result.task.task_id}.yaml`;
-    await Bun.write(outputPath, result.yaml);
+    await writeFile(outputPath, result.yaml, "utf8");
     console.log(JSON.stringify({ ...result, output_path: outputPath, yaml: undefined }, null, 2));
   } else if (command === "assemble") {
     const [taskPath, model = "chatgpt"] = args;
