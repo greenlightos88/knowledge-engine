@@ -1,0 +1,112 @@
+version: 1.0
+name: GreenLitTaskEnvelope
+purpose: Normalize every user request before routing, retrieval or generation.
+
+required:
+  - task_id
+  - request
+  - action
+  - project
+  - artifact
+  - authority
+  - output
+
+fields:
+  task_id:
+    type: string
+    description: Stable identifier for the execution and its audit trail.
+
+  request:
+    type: object
+    required: [raw, normalized_goal]
+    properties:
+      raw: { type: string }
+      normalized_goal: { type: string }
+      explicit_constraints: { type: array, items: { type: string } }
+      prohibited_outcomes: { type: array, items: { type: string } }
+      urgency: { enum: [normal, high, immediate] }
+
+  action:
+    type: object
+    required: [type]
+    properties:
+      type:
+        enum: [develop, diagnose, design, draft, revise, evaluate, synchronize, research, package, export]
+      scope:
+        enum: [fragment, scene, sequence, act, episode, screenplay, bible, project, repository, system]
+      mode:
+        enum: [creative, analytical, operational, production, hybrid]
+
+  project:
+    type: object
+    required: [id]
+    properties:
+      id: { type: string }
+      manifest_path: { type: string }
+      canon_sources: { type: array, items: { type: string } }
+      decision_ledger: { type: string }
+      genre_contract: { type: string }
+      production_mode: { type: string }
+
+  artifact:
+    type: object
+    required: [kind]
+    properties:
+      kind: { type: string }
+      source_paths: { type: array, items: { type: string } }
+      target_paths: { type: array, items: { type: string } }
+      current_state: { enum: [missing, draft, revision, approved, locked] }
+
+  authority:
+    type: object
+    required: [order]
+    properties:
+      order:
+        type: array
+        items: { type: string }
+      locked_decisions: { type: array, items: { type: string } }
+      unresolved_conflicts: { type: array, items: { type: string } }
+      permitted_inference: { enum: [none, conservative, generative] }
+
+  retrieval:
+    type: object
+    properties:
+      route: { type: string }
+      primary_documents: { type: array, maxItems: 4, items: { type: string } }
+      secondary_documents: { type: array, maxItems: 4, items: { type: string } }
+      gates: { type: array, items: { type: string } }
+      dependency_hops: { type: integer, minimum: 0, maximum: 3, default: 1 }
+      context_budget: { type: integer, description: Approximate token ceiling for assembled context. }
+
+  output:
+    type: object
+    required: [deliverable, format]
+    properties:
+      deliverable: { type: string }
+      format: { type: string }
+      audience: { type: string }
+      completion_definition: { type: array, items: { type: string } }
+      include_reasoning_summary: { type: boolean, default: true }
+      include_dependency_report: { type: boolean, default: true }
+
+  validation:
+    type: object
+    properties:
+      required_gates: { type: array, items: { type: string } }
+      repair_passes: { type: integer, minimum: 0, maximum: 3, default: 1 }
+      fail_closed_on_canon_conflict: { type: boolean, default: true }
+
+  execution_state:
+    type: object
+    properties:
+      status: { enum: [created, routed, assembled, executing, validating, synchronizing, complete, partial, blocked] }
+      assumptions: { type: array, items: { type: string } }
+      risks: { type: array, items: { type: string } }
+      affected_dependencies: { type: array, items: { type: string } }
+
+invariants:
+  - Current explicit user instruction outranks repository defaults.
+  - Project canon outranks general doctrine.
+  - Unsupported additions remain proposals until approved.
+  - Every retrieved document must have a stated task-specific reason.
+  - A completed task must include validation and dependency status.

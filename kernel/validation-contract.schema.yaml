@@ -1,0 +1,63 @@
+version: 1.0
+name: GreenLitValidationContract
+purpose: Make quality evaluation explicit, repeatable and machine-readable.
+
+required:
+  - task_id
+  - gates
+  - overall_status
+
+fields:
+  task_id: { type: string }
+  artifact: { type: string }
+  overall_status:
+    enum: [pass, pass_with_risk, fail, blocked]
+
+  gates:
+    type: array
+    items:
+      type: object
+      required: [id, status, evidence]
+      properties:
+        id: { type: string }
+        status: { enum: [pass, fail, not_applicable, blocked] }
+        evidence: { type: array, items: { type: string } }
+        severity: { enum: [low, medium, high, critical] }
+        repair:
+          type: object
+          properties:
+            required: { type: boolean }
+            intervention: { type: string }
+            completed: { type: boolean }
+            post_repair_status: { enum: [pass, fail, not_run] }
+
+  canon_integrity:
+    type: object
+    properties:
+      conflicts_found: { type: array, items: { type: string } }
+      invented_facts: { type: array, items: { type: string } }
+      proposals_clearly_labeled: { type: boolean }
+
+  intent_integrity:
+    type: object
+    properties:
+      decisive_intent_constraints: { type: array, items: { type: string } }
+      drift_detected: { type: array, items: { type: string } }
+      preserved_strengths: { type: array, items: { type: string } }
+
+  residual_risk:
+    type: array
+    items:
+      type: object
+      required: [risk, consequence]
+      properties:
+        risk: { type: string }
+        consequence: { type: string }
+        mitigation: { type: string }
+
+rules:
+  - A gate cannot pass without cited evidence from the artifact or execution record.
+  - Critical canon conflict forces overall_status to blocked or fail.
+  - Validation may not reward polish that contradicts creator intent.
+  - Failed gates require repair or explicit residual-risk disclosure.
+  - Self-evaluation must remain shorter than the artifact unless the user requests a full report.

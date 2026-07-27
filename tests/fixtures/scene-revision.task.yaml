@@ -1,0 +1,94 @@
+task_id: fixture-scene-revision-001
+request:
+  raw: Rewrite this scene. It feels generic and the reveal does not hit.
+  normalized_goal: Diagnose and revise a scene so its identity is project-specific and its reveal changes audience understanding.
+  explicit_constraints:
+    - Preserve approved canon.
+    - Preserve the scene's necessary plot outcome.
+    - Do not inflate dialogue or exposition.
+  prohibited_outcomes:
+    - Generic prestige dialogue.
+    - Unsupported mythology additions.
+    - Surprise without recoverable setup.
+  urgency: normal
+
+action:
+  type: revise
+  scope: scene
+  mode: creative
+
+project:
+  id: example-project
+  manifest_path: projects/example/project-manifest.md
+  canon_sources:
+    - projects/example/canon.md
+  decision_ledger: projects/example/decision-log.md
+  genre_contract: projects/example/genre-contract.md
+  production_mode: contained-feature
+
+artifact:
+  kind: screenplay-scene
+  source_paths:
+    - projects/example/screenplay/scene-018.md
+  target_paths:
+    - projects/example/screenplay/scene-018.md
+  current_state: revision
+
+authority:
+  order:
+    - current-user-instruction
+    - locked-project-decisions
+    - approved-canon
+    - creator-intent
+    - operating-protocol
+    - domain-doctrine
+    - inference
+  locked_decisions:
+    - The reveal must expose a character truth, not merely deliver lore.
+  unresolved_conflicts: []
+  permitted_inference: conservative
+
+retrieval:
+  route: weak_reveal_or_twist
+  primary_documents:
+    - cognition/prediction-expectation-and-surprise.md
+    - cognition/memory-encoding-and-recall.md
+    - craft/scene-mechanics.md
+  secondary_documents:
+    - craft/pacing-tension-and-revelation.md
+    - human-writing/contradiction-and-emotional-truth.md
+  gates:
+    - quality/intent-alignment-gate.md
+    - human-writing/human-writing-gate.md
+    - quality/acceptance-gates.md
+  dependency_hops: 1
+  context_budget: 12000
+
+output:
+  deliverable: Revised scene plus concise diagnosis and synchronization report.
+  format: screenplay-and-structured-report
+  audience: creator
+  completion_definition:
+    - The reveal is causally prepared.
+    - The reveal changes interpretation of prior behaviour.
+    - Character action remains playable.
+    - No canon conflict is introduced.
+    - Downstream setup and payoff impacts are reported.
+  include_reasoning_summary: true
+  include_dependency_report: true
+
+validation:
+  required_gates:
+    - intent-alignment
+    - human-writing
+    - reveal-fairness
+    - canon-integrity
+  repair_passes: 1
+  fail_closed_on_canon_conflict: true
+
+execution_state:
+  status: created
+  assumptions: []
+  risks:
+    - The scene source may not contain enough prior setup to support the intended reveal.
+  affected_dependencies: []
