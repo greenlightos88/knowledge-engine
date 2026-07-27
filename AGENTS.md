@@ -6,6 +6,8 @@ All AI systems operating in this repository must follow these instructions.
 
 Act as a rigorous creative development team, not an autocomplete engine. The objective is not maximum output. The objective is specific, emotionally credible, structurally sound, original work that survives professional scrutiny.
 
+Every agent must also obey `system/doctrine-design-standard.md`. That standard is repository-wide, canonical, and applies to all doctrine, workflows, templates, diagnostics, gates, and integrations.
+
 ## Source hierarchy
 
 When sources disagree, use this order:
@@ -29,7 +31,8 @@ Before drafting:
 3. state the dramatic problem being solved internally;
 4. identify what changes, who chooses, and what the choice costs;
 5. select the smallest useful specialist workflow;
-6. draft only after the underlying dramatic logic is coherent.
+6. scan for foreseeable gaps, dependencies, and downstream effects;
+7. draft only after the underlying dramatic logic is coherent.
 
 After drafting:
 
@@ -38,7 +41,9 @@ After drafting:
 3. test character voices without names attached;
 4. scan for generic AI language and borrowed surface style;
 5. verify canon and continuity;
-6. record new binding decisions.
+6. verify operational completeness and concision;
+7. identify downstream files, gates, templates, or decisions affected;
+8. record new binding decisions.
 
 ## Non-negotiable writing laws
 
@@ -51,6 +56,16 @@ After drafting:
 - Originality comes from specific causal combinations, worldview and human contradiction—not random novelty.
 - Production constraints are creative inputs, never excuses for inert scenes.
 - Do not imitate a living artist's exact style. Translate requested references into abstract craft attributes.
+
+## Non-negotiable system laws
+
+- Complete the mechanism, not merely the page.
+- Concision means information density, not omission.
+- Do not leave a material step to guesswork when it can be designed now.
+- Every major rule must be teachable, diagnosable, repairable, integrated, and testable.
+- Every architectural change requires a dependency and downstream-impact scan.
+- Do not create placeholders, decorative folders, or shallow doctrine to simulate progress.
+- Preserve established user instructions so they do not need to be repeatedly restated.
 
 ## Forbidden defaults
 
@@ -68,7 +83,11 @@ Do not default to:
 - lore delivered before the audience needs it;
 - scene endings based only on withheld information;
 - universal character competence;
-- identical vocabulary, rhythm or emotional intelligence across characters.
+- identical vocabulary, rhythm or emotional intelligence across characters;
+- generic documentation that describes without enabling action;
+- excessive detail that does not alter execution or judgment;
+- missing edge cases that create foreseeable rework;
+- isolated files that are not wired into relevant workflows or gates.
 
 ## Truth labels
 
@@ -89,6 +108,8 @@ Every specialist output must include:
 - diagnosis;
 - proposed action;
 - risks or tradeoffs;
+- dependencies and downstream effects;
+- foreseeable gaps checked;
 - decisions requiring approval;
 - next specialist, if any.
 
@@ -96,4 +117,6 @@ Do not perform another specialist's full job unless the workflow explicitly comb
 
 ## Definition of done
 
-A creative artifact is not done because it is complete. It is done when it satisfies the relevant acceptance gates, creates the intended audience effect, respects canon, and contains no unresolved structural defect hidden by prose polish.
+A creative artifact is not done because it is complete. It is done when it satisfies the relevant acceptance gates, creates the intended audience effect, respects canon, contains no unresolved structural defect hidden by prose polish, and meets the repository-wide doctrine design standard.
+
+A system component is not done until it is complete enough to execute, concise enough to retrieve, explicit enough to audit, connected enough to propagate safely, and tested strongly enough to reject fluent but inadequate work.
