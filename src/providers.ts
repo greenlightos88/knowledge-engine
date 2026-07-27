@@ -1,3 +1,4 @@
+import OpenAI from "openai";
 import { z } from "zod";
 
 export const ProviderRequestSchema = z.object({
@@ -35,6 +36,36 @@ export interface ModelProvider {
   execute(request: ProviderRequest): Promise<ProviderResponse>;
 }
 
+function renderExecutionInput(request: ProviderRequest): string {
+  const context = request.context.map((item, index) => {
+    const provenance = item.repository
+      ? `repository=${item.repository} ref=${item.ref ?? "unknown"} sha=${item.sha ?? "unknown"}`
+      : "repository=knowledge-engine";
+    return [
+      `--- CONTEXT ${index + 1} ---`,
+      `path: ${item.path}`,
+      `authority: ${item.authority}`,
+      provenance,
+      item.content,
+    ].join("\n");
+  }).join("\n\n");
+
+  return [
+    "Execute the GreenLit task below.",
+    "Return the completed artifact and a structured report containing diagnosis, canon impact, validation claims, synchronization impact, and unresolved questions.",
+    "Do not claim that repository files were changed.",
+    "",
+    "TASK:",
+    JSON.stringify(request.task, null, 2),
+    "",
+    "OUTPUT CONTRACT:",
+    JSON.stringify(request.output_contract, null, 2),
+    "",
+    "AUTHORITATIVE CONTEXT:",
+    context,
+  ].join("\n");
+}
+
 export class DryRunProvider implements ModelProvider {
   readonly id = "dry-run";
 
@@ -61,9 +92,41 @@ export class DryRunProvider implements ModelProvider {
 export class OpenAIProvider implements ModelProvider {
   readonly id = "openai";
 
-  async execute(_request: ProviderRequest): Promise<ProviderResponse> {
-    if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is required for OpenAI execution.");
-    throw new Error("OpenAI transport is declared but not enabled until the official SDK integration is installed and tested.");
+  async execute(request: ProviderRequest): Promise<ProviderResponse> {
+    ProviderRequestSchema.parse(request);
+    const apiKey = process.env.OPENAI_API_KEY;
+    const model = process.env.OPENAI_MODEL;
+    if (!apiKey) throw new Error("OPENAI_API_KEY is required for OpenAI execution.");
+    if (!model) throw new Error("OPENAI_MODEL is required for OpenAI execution; GreenLit never guesses a live model version.");
+
+    const client = new OpenAI({
+      apiKey,
+      maxRetries: 2,
+      timeout: 120_000,
+    });
+
+    const response = await client.responses.create({
+      model,
+      instructions: request.system_instructions,
+      input: renderExecutionInput(request),
+    });
+
+    return ProviderResponseSchema.parse({
+      execution_id: request.execution_id,
+      provider: this.id,
+      model,
+      content: response.output_text,
+      structured: {
+        response_id: response.id,
+        status: response.status,
+        source_model_alias: request.model,
+      },
+      usage: response.usage ? {
+        input_tokens: response.usage.input_tokens,
+        output_tokens: response.usage.output_tokens,
+      } : undefined,
+      finish_reason: response.status,
+    });
   }
 }
 
