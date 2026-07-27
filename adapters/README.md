@@ -52,15 +52,21 @@ The runtime selects one adapter after the task envelope is created and before th
 ```text
 request
 → task envelope
+→ model registry
 → model adapter
-→ context packet
+→ context assembly
 → execution pipeline
 → validation
 → synchronization report
 ```
 
+The runtime must use `adapters/model-registry.yaml` to resolve supported models and `kernel/context-assembly-contract.md` to keep source selection stable across models.
+
 ## Current adapters
 
-- `chatgpt/adapter.md`
+- `chatgpt/adapter.md` — interactive development, bounded diagnosis and repository-integrated execution.
+- `claude/adapter.md` — long-document synthesis, continuity review and structural decomposition.
+
+Both are first-class adapters and must satisfy `tests/cross-model-parity.md`.
 
 Future adapters should be added only when they improve real execution. Empty compatibility folders are prohibited.
