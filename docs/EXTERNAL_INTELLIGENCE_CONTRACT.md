@@ -6,7 +6,9 @@ The Knowledge Engine is an external creative-intelligence provider for GreenLit.
 
 GreenLit must not depend on the Knowledge Engine's internal council passes, prompts, model routing, repository layout, or repair machinery. Those details may change without requiring a GreenLit migration.
 
-The stable boundary is defined in `src/external-contract.ts` and versioned independently through `contract_version`.
+The stable payload boundary is defined in `src/external-contract.ts` and versioned independently through `contract_version`.
+
+The transport-neutral execution boundary is defined in `src/external-service.ts`. HTTP, Convex actions, queue workers, local commands and tests should call this service rather than importing internal orchestration modules.
 
 ## Authority Boundary
 
@@ -80,11 +82,36 @@ Internal `council_report`, model prompts and validation passes are intentionally
 
 ## Status Semantics
 
+Response-body status:
+
 - `completed`: the engine produced a reviewable result without unresolved Canon conflicts or unresolved synchronization questions.
 - `blocked`: a result exists, but unresolved Canon or synchronization issues prevent safe acceptance.
 - `failed`: the engine could not produce a valid contract response.
 
 A `completed` response is still only a proposal. It does not mean approved.
+
+Service-boundary result semantics:
+
+- `200`: a valid versioned external response was produced;
+- `400 invalid_request`: the request failed contract validation and execution did not begin;
+- `409 authority_conflict`: supplied authority contains unresolved conflicts and execution did not begin;
+- `502 execution_failed`: the underlying engine or provider failed; the caller may retry according to policy;
+- `502 invalid_engine_result`: the engine returned data that failed its internal result contract and must not be persisted.
+
+Every service error includes the same `contract_version`, the `request_id` when recoverable, a stable error code, a retryable flag and structured diagnostic details.
+
+## Execution Boundary
+
+`handleExternalIntelligenceRequest(rawRequest, executor)` owns the invariant boundary:
+
+1. validate the external request;
+2. reject unresolved authority conflicts before model execution;
+3. invoke one internal engine executor;
+4. validate the internal creative result;
+5. translate only stable product concepts into the external response;
+6. preserve creator approval and non-mutation guarantees.
+
+The injected executor is the only part that knows how internal planning, council selection, provider routing and repair operate. Transport adapters must not duplicate those concerns.
 
 ## Versioning
 
@@ -103,11 +130,13 @@ The expected application path is:
 ```text
 GreenLit Fragment and project context
 → ExternalIntelligenceRequest 1.0
-→ Knowledge Engine execution
+→ transport adapter
+→ handleExternalIntelligenceRequest
+→ internal executor
 → ExternalIntelligenceResponse 1.0
 → GreenLit Candidate persistence
 → creator review
 → explicit Canon event
 ```
 
-No transport is prescribed by this contract. HTTP, job queues, local process execution and test adapters may all use the same payload semantics.
+No network transport is prescribed by this contract. Authentication, rate limiting, request persistence, retry policy and deployment remain responsibilities of the eventual transport adapter and hosting environment.
