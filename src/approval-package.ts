@@ -5,9 +5,19 @@ import type { CreativeResult, GateResult } from "./validation";
 export type ApprovalPackage = {
   package_version: "1.0";
   execution_id: string;
-  project: { id?: string; repository?: string; source_ref?: string; target_branch?: string };
+  project: {
+    id: string | undefined;
+    repository: string | undefined;
+    source_ref: string | undefined;
+    target_branch: string | undefined;
+  };
   request_hash: string;
-  source_provenance: Array<{ repository?: string; ref?: string; path: string; sha?: string }>;
+  source_provenance: Array<{
+    repository: string | undefined;
+    ref: string | undefined;
+    path: string;
+    sha: string | undefined;
+  }>;
   proposed_changes: Array<{ path: string; operation: "update" | "create"; content: string; reason: string }>;
   validation: { passed: boolean; gates: GateResult[]; failures: string[] };
   approval: { required: true; status: "pending"; writeback_performed: false };
