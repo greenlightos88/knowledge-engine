@@ -11,6 +11,7 @@
     "run": "bun run src/cli.ts run",
     "typecheck": "bunx tsc --noEmit",
     "test": "bun test",
+    "test:external": "bun test tests/external-contract.test.ts tests/external-service.test.ts",
     "check": "bun run typecheck && bun test"
   },
   "dependencies": {
