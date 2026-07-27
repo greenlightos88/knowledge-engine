@@ -7,9 +7,35 @@ const ClaimSchema = z.object({
   failures: z.array(z.string()).default([]),
 });
 
+const ConfidenceSchema = z.object({
+  level: z.enum(["low", "medium", "high"]),
+  evidence: z.array(z.string()).default([]),
+  uncertainty: z.array(z.string()).default([]),
+});
+
+const ScoreSchema = z.number().int().min(0).max(10);
 type Claim = z.infer<typeof ClaimSchema>;
 
 export const CreativeResultSchema = z.object({
+  intent_contract: z.object({
+    surface_request: z.string().min(1),
+    deeper_objective: z.string().min(1),
+    audience_effect: z.array(z.string()).default([]),
+    artifact_target: z.string().min(1),
+    preserve: z.array(z.string()).default([]),
+    constraints: z.array(z.string()).default([]),
+    anti_goals: z.array(z.string()).default([]),
+    success_conditions: z.array(z.string()).default([]),
+    assumptions: z.array(z.string()).default([]),
+    open_uncertainties: z.array(z.string()).default([]),
+  }),
+  council_report: z.object({
+    mode: z.enum(["light", "standard", "deep"]),
+    passes_run: z.array(z.string()).min(1),
+    findings_applied: z.array(z.string()).default([]),
+    findings_rejected: z.array(z.object({ finding: z.string(), reason: z.string() })).default([]),
+    remaining_disagreements: z.array(z.string()).default([]),
+  }),
   diagnosis: z.object({
     primary_failure: z.string().min(1),
     supporting_failures: z.array(z.string()).default([]),
@@ -22,6 +48,25 @@ export const CreativeResultSchema = z.object({
     preserved: z.array(z.string()).default([]),
     conflicts: z.array(z.string()).default([]),
     new_inferences: z.array(z.string()).default([]),
+  }),
+  confidence: z.object({
+    intent: ConfidenceSchema,
+    canon: ConfidenceSchema,
+    craft: ConfidenceSchema,
+    production: ConfidenceSchema,
+  }),
+  wow_scorecard: z.object({
+    intent_fidelity: ScoreSchema,
+    canon_integrity: ScoreSchema,
+    creative_causality: ScoreSchema,
+    human_writing: ScoreSchema,
+    audience_design: ScoreSchema,
+    production_usefulness: ScoreSchema,
+    long_horizon_coherence: ScoreSchema,
+    taste_fit: ScoreSchema,
+    trust_transparency: ScoreSchema,
+    usability_momentum: ScoreSchema,
+    creator_validation_required_for_ten: z.literal(true),
   }),
   validation_claims: z.object({
     intent_alignment: ClaimSchema,
@@ -86,7 +131,7 @@ export function validateCreativeResponse(request: ProviderRequest, response: Pro
     return { status: "failed", valid: false, parsed: null, gates: [], failures: [`Invalid response contract: ${message}`] };
   }
 
-  const task = request.task as { validation?: { required_gates?: string[] } };
+  const task = request.task as { validation?: { required_gates?: string[] }; high_fidelity?: { council?: { passes?: string[] } } };
   const requiredGates = task.validation?.required_gates ?? [];
   const gates: GateResult[] = requiredGates.map((gate) => {
     const claim = gateClaim(parsed, gate);
@@ -97,6 +142,15 @@ export function validateCreativeResponse(request: ProviderRequest, response: Pro
   const failures = gates.flatMap((gate) => gate.passed ? [] : gate.failures.map((failure) => `${gate}: ${failure}`));
   if (parsed.canon_report.conflicts.length > 0) failures.push(...parsed.canon_report.conflicts.map((item) => `canon conflict: ${item}`));
   if (parsed.synchronization.unresolved_questions.length > 0) failures.push(...parsed.synchronization.unresolved_questions.map((item) => `unresolved: ${item}`));
+  if (parsed.council_report.remaining_disagreements.length > 0) failures.push(...parsed.council_report.remaining_disagreements.map((item) => `council disagreement: ${item}`));
+
+  const plannedPasses = task.high_fidelity?.council?.passes ?? [];
+  const missingPasses = plannedPasses.filter((pass) => !parsed.council_report.passes_run.includes(pass));
+  if (missingPasses.length > 0) failures.push(`Council passes not reported: ${missingPasses.join(", ")}`);
+
+  const scores = Object.entries(parsed.wow_scorecard).filter(([key]) => key !== "creator_validation_required_for_ten") as Array<[string, number]>;
+  const unsupportedTens = scores.filter(([, score]) => score === 10);
+  if (unsupportedTens.length > 0) failures.push(`Score of 10 requires external creator or benchmark evidence: ${unsupportedTens.map(([key]) => key).join(", ")}`);
 
   return {
     status: failures.length === 0 ? "passed" : "failed",

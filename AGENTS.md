@@ -13,6 +13,8 @@ Quality is project-relative. Prestige, seriousness, realism, restraint, emotiona
 Every agent must obey:
 
 - `system/creator-intent-standard.md`;
+- `system/intent-reconstruction-standard.md`;
+- `system/creative-council-standard.md`;
 - `system/doctrine-design-standard.md`;
 - `system/full-capability-standard.md`.
 
@@ -27,9 +29,10 @@ When sources disagree, use this order:
 3. project constitution or canonical manifest;
 4. locked decision log;
 5. current approved outline, character files and continuity;
-6. Knowledge Engine universal standards;
-7. research notes with provenance;
-8. agent inference.
+6. approved creator taste profile, subject to project-specific overrides;
+7. Knowledge Engine universal standards;
+8. research notes with provenance;
+9. agent inference.
 
 Never silently overwrite higher-order canon or creator intent. Mark unresolved conflicts.
 
@@ -39,26 +42,31 @@ Before drafting:
 
 1. identify the exact deliverable and audience;
 2. load or establish the approved Creative Success Profile;
-3. identify creator intent, anti-goals, sincerity mode, genre contract, and target audience experience;
-4. load relevant canon and constraints;
-5. state the dramatic or experiential problem being solved internally;
-6. identify what changes, who chooses, what the choice costs, or what comic, sensory, or genre effect must land;
-7. select the smallest useful specialist workflow;
-8. scan for foreseeable gaps, dependencies, tonal drift, and downstream effects;
-9. draft only after the governing logic is coherent enough for the chosen mode.
+3. reconstruct the request into an Intent Contract;
+4. identify creator intent, anti-goals, sincerity mode, genre contract, and target audience experience;
+5. load relevant canon, creator taste evidence, and constraints;
+6. state the dramatic or experiential problem being solved internally;
+7. identify what changes, who chooses, what the choice costs, or what comic, sensory, or genre effect must land;
+8. select light, standard, or deep Creative Council mode;
+9. scan for foreseeable gaps, dependencies, tonal drift, and downstream effects;
+10. draft only after the governing logic is coherent enough for the chosen mode.
 
 After drafting:
 
 1. run the Intent Alignment Gate;
 2. test the project-specific weighted success criteria;
-3. test causality, character agency, escalation, comic mechanism, spectacle, atmosphere, or other relevant mode-specific requirements;
-4. remove explanation that image, behavior, conflict, timing, or form already conveys;
-5. test character voices and performer playability where relevant;
-6. scan for generic AI language, borrowed surface style, prestige contamination, and irony poisoning;
-7. verify canon and continuity;
-8. verify operational completeness and concision;
-9. identify downstream files, gates, templates, or decisions affected;
-10. record new binding decisions.
+3. run the applicable Creative Council passes;
+4. test causality, character agency, escalation, comic mechanism, spectacle, atmosphere, or other relevant mode-specific requirements;
+5. remove explanation that image, behavior, conflict, timing, or form already conveys;
+6. test character voices and performer playability where relevant;
+7. scan for generic AI language, borrowed surface style, prestige contamination, and irony poisoning;
+8. verify canon and continuity;
+9. run adversarial critique for high-value work;
+10. perform targeted repair rather than indiscriminate regeneration;
+11. score the result with `quality/wow-readiness-scorecard.md` when the task requires exceptional output;
+12. verify operational completeness and concision;
+13. identify downstream files, gates, templates, or decisions affected;
+14. record new binding decisions.
 
 ## Non-negotiable creative laws
 
@@ -102,6 +110,10 @@ Agents must not automatically:
 - Do not create placeholders, decorative folders, or shallow doctrine to simulate progress.
 - Preserve established user instructions so they do not need to be repeatedly restated.
 - Universal doctrine must remain subordinate to explicit project intent where no safety, legal, factual, canon, or production conflict exists.
+- One orchestrator must synthesize specialist reasoning into one coherent answer.
+- Taste memory may guide proposals but may never silently create Canon.
+- Confidence must be dimensional and evidence-based, not a decorative percentage.
+- A score of 10 requires creator validation or benchmark evidence; the engine cannot award itself perfection.
 
 ## Forbidden defaults
 
@@ -130,7 +142,10 @@ Do not default to:
 - generic documentation that describes without enabling action;
 - excessive detail that does not alter execution or judgment;
 - missing edge cases that create foreseeable rework;
-- isolated files that are not wired into relevant workflows or gates.
+- isolated files that are not wired into relevant workflows or gates;
+- exposing a swarm of agent voices instead of one synthesized collaborator;
+- rewriting successful material merely to demonstrate activity;
+- asking the creator to repeat context already available in approved sources.
 
 ## Truth labels
 
@@ -154,12 +169,19 @@ Every specialist output must include:
 - explanation of how the action strengthens intent;
 - risks or tradeoffs;
 - identity or tonal drift risk;
+- confidence by relevant dimension;
 - dependencies and downstream effects;
 - foreseeable gaps checked;
 - decisions requiring approval;
 - next specialist, if any.
 
 Do not perform another specialist's full job unless the workflow explicitly combines roles.
+
+## Creator experience standard
+
+The creator should experience one collaborator that remembers the work, understands the actual objective, presents the artifact before process narration, and asks only for decisions that genuinely require authorship.
+
+The system should reduce re-explanation, protect momentum, reveal uncertainty honestly, and leave a clear next action. It must feel fitted to the creator and project without becoming opaque, presumptuous, or canonically autonomous.
 
 ## Definition of done
 
