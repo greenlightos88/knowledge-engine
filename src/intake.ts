@@ -20,14 +20,14 @@ const ProjectRegistrySchema = z.object({
 export type ProjectRegistry = z.infer<typeof ProjectRegistrySchema>;
 
 const ROUTES = [
-  { id: "scene_revision", terms: ["scene", "rewrite", "revise", "generic"] },
-  { id: "weak_reveal_or_twist", terms: ["reveal", "twist", "payoff", "surprise"] },
-  { id: "dialogue_revision", terms: ["dialogue", "line", "subtext", "voice"] },
-  { id: "character_psychology", terms: ["character", "motivation", "psychology", "arc"] },
-  { id: "canon_or_mythology_refactor", terms: ["canon", "mythology", "cosmology", "covenant", "lore"] },
-  { id: "continuity_audit", terms: ["continuity", "contradiction", "inconsistent", "audit"] },
-  { id: "production_feasibility", terms: ["budget", "produce", "production", "location", "stunt"] },
-  { id: "studio_bible", terms: ["bible", "producer", "actor-ready", "dossier"] },
+  { id: "canon_or_mythology_refactor", priority: 100, terms: ["canon", "mythology", "cosmology", "covenant", "lore"] },
+  { id: "continuity_audit", priority: 90, terms: ["continuity", "contradiction", "inconsistent", "audit"] },
+  { id: "production_feasibility", priority: 80, terms: ["budget", "produce", "production", "location", "stunt"] },
+  { id: "weak_reveal_or_twist", priority: 70, terms: ["reveal", "twist", "payoff", "surprise"] },
+  { id: "dialogue_revision", priority: 60, terms: ["dialogue", "line", "subtext", "voice"] },
+  { id: "character_psychology", priority: 50, terms: ["character", "motivation", "psychology", "arc"] },
+  { id: "studio_bible", priority: 40, terms: ["bible", "producer", "actor-ready", "dossier"] },
+  { id: "scene_revision", priority: 10, terms: ["scene", "rewrite", "revise", "generic"] },
 ] as const;
 
 function normalize(value: string): string {
@@ -57,8 +57,9 @@ export function classifyRoute(request: string): string {
   const normalized = normalize(request);
   const ranked = ROUTES.map((route) => ({
     id: route.id,
+    priority: route.priority,
     score: route.terms.reduce((score, term) => score + (normalized.includes(term) ? 1 : 0), 0),
-  })).sort((a, b) => b.score - a.score);
+  })).sort((a, b) => b.score - a.score || b.priority - a.priority);
 
   const best = ranked[0];
   if (!best || best.score === 0) return "general_creative_diagnostic";
